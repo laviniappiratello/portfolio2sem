@@ -1,16 +1,15 @@
-// 1. Importe o Express corretamente
-const express = require('express');
-const app = express(); // Esta linha cria a variável 'app'
 
-// 2. Configure o EJS e arquivos estáticos
+const express = require('express');
+const app = express(); 
+
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 
-// 3. Adicione middleware para processar formulários
 app.use(express.urlencoded({ extended: true }));
 
-// 4. Dados dos projetos (adicione seus projetos reais aqui)
+
 const projetos = [
   {
     id: 1,
@@ -60,23 +59,19 @@ const projetos = [
 app.get('/', (req, res) => {
   res.render('index', {
     title: 'Meu Portfólio',
-    projetos: projetos.slice(0, 3), // Mostra apenas 3 projetos na home
+    projetos: projetos.slice(0, 4), 
   });
 });
 
 app.get('/projetos', (req, res) => {
   res.render('projetos', {
     title: 'Meus Projetos',
-    projetos: projetos // Mostra todos os projetos
+    projetos: projetos
   });
 });
 
 
-
-
-
-// 6. Inicie o servidor
-const PORT = process.env.PORT || 8080; // Usa a porta do Railway OU 8080 localmente
+const PORT = process.env.PORT || 8080; 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

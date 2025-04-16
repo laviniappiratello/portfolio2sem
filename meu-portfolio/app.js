@@ -76,7 +76,7 @@ app.get('/projetos', (req, res) => {
 
 
 // 6. Inicie o servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 8080; // Usa a porta do Railway OU 8080 localmente
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

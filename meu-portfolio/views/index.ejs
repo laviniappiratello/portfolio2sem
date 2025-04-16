@@ -1,0 +1,223 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  
+  <link rel="icon" href="/img/computer.png">
+  <%- include('partials/header') %>
+</head>
+<body>
+  <canvas id="glitchCanvas" class="glitch-bg"></canvas>
+  
+  <!-- Container Principal -->
+  <main class="container">
+    <!-- Seção Perfil -->
+    <section class="perfil">
+      
+
+      <div class="info">
+        <h1>Lavínia Piratello</h1>
+        <p class="cargo">Desenvolvedora de Software</p>
+        <p class="descricao">Sou estudante de Desenvolvimento de Software Multiplataforma na FATEC São José dos Campos, atualmente no 2º semestre. Tenho experiência em projetos acadêmicos em parceria com empresas reais, onde aplico metodologias ágeis como Scrum para o desenvolvimento de soluções. Busco oportunidades para crescer na área de tecnologia e aplicar meus conhecimentos em projetos desafiadores.</p>
+        
+        <a href="/downloads/curriculo.pdf" download class="btn-download">
+          <i class="fas fa-file-pdf"></i> Baixar Currículo
+        </a>
+      </div>
+
+      <img src="/img/minha-foto.jpg" alt="Lavinia Piratello" class="foto-perfil" style="cursor: help;">
+    </section>
+
+    <hr class="divisoria-verde">
+
+    <!-- Seção Habilidades -->
+    <section class="habilidades">
+      <h2>Minhas Habilidades</h2>
+      <div class="tech-stack">
+        <!-- Frontend -->
+        <div class="tech-item">
+          <i class="devicon-html5-plain colored"></i>
+          <span>HTML</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-css3-plain colored"></i>
+          <span>CSS</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-javascript-plain colored"></i>
+          <span>JavaScript</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-typescript-plain colored"></i>
+          <span>TypeScript</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-react-original colored"></i>
+          <span>React</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-sass-original colored"></i>
+          <span>Sass</span>
+        </div>
+
+        <div class="tech-item ">
+          <i class="devicon-tailwindcss-plain colored"></i>
+          <span class="text-white font-medium">Tailwind</span>
+        </div>
+
+        <div class="tech-item">
+          <i class="devicon-bootstrap-plain colored"></i>
+          <span class="text-white font-medium">Bootstrap</span>
+        </div>
+        
+      
+        <!-- Backend -->
+        <div class="tech-item">
+          <i class="devicon-nodejs-plain colored"></i>
+          <span>Node.js</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-express-original"></i>
+          <span>Express</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-python-plain colored"></i>
+          <span>Python</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-flask-original"></i>
+          <span>Flask</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-mysql-plain colored"></i>
+          <span>SQL</span>
+        </div>
+      
+        <!-- DevOps -->
+        <div class="tech-item">
+          <i class="devicon-amazonwebservices-plain colored"></i>
+          <span>AWS</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-docker-plain colored"></i>
+          <span>Docker</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-git-plain colored"></i>
+          <span>Git</span>
+        </div>
+      
+        <!-- Ferramentas -->
+        <div class="tech-item">
+          <i class="devicon-figma-plain" style="color: #F24E1E;"></i>
+          <span>Figma</span>
+        </div>
+        <div class="tech-item">
+          <i class="devicon-jira-plain" style="color: #0052CC;"></i>
+          <span>Jira</span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divisoria-verde">
+
+    <!-- Seção Projetos -->
+    <section class="projetos-home">
+      <h2 style="margin-bottom: 2%; margin-top: -20px;">Projetos Destacados</h2>
+      <div class="cards">
+        <% if (projetos && projetos.length) { %>
+          <% projetos.forEach(projeto => { %>
+            <div class="card" >
+              <h3 style="display: flex; justify-content: center;" ><%= projeto.nome %></h3>
+              <p style="display: flex; justify-content: center;" ><%= projeto.descricao %></p>
+              <% if (projeto.github) { %>
+                <div class="projeto-links" style="margin-top: 15px;">
+                  <a href="<%= projeto.github %>" target="_blank" class="btn-github" >
+                    <i class="fab fa-github"></i> Código no GitHub
+                  </a>
+                </div>
+              <% } %>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p>Nenhum projeto disponível no momento.</p>
+        <% } %>
+        
+      </div>
+      <div class="ver-mais-container">
+        <a href="/projetos" target="_blank" class="btn-ver-mais">
+          <i class="fas fa-arrow-right"></i> Ver Todos os Projetos
+        </a>
+      </div>
+    </section>
+
+
+    
+<hr class="divisoria-verde">
+
+<section class="certificados">
+  <h2 style="margin-bottom: 2%; margin-top: -20px;">Certificados</h2>
+  <div class="cards">
+    <!-- Certificado 1 -->
+    <div class="card">
+      <img src="/img/certificados/bd1.PNG" alt="Certificado 1" class="certificado-img">
+      <h3 style="display: flex; justify-content: center;">
+        Banco de Dados 1</h3>
+      <p style="display: flex; justify-content: center;">Governo Federal</p>
+      <p style="display: flex; justify-content: center;">Data: Julho 2024</p>
+    </div>
+    
+    <!-- Certificado 2 -->
+    <div class="card">
+      <img src="/img/certificados/backendjr.PNG" alt="Certificado 2" class="certificado-img">
+      <h3 style="display: flex; justify-content: center;">
+        Backend Jr.</h3>
+      <p style="display: flex; justify-content: center;">Instituição: Rocketseat</p>
+      <p style="display: flex; justify-content: center;"> Data: Agosto 2024</p>
+    </div>
+    
+    <!-- Certificado 3 -->
+    <div class="card">
+      <img src="/img/certificados/algoritmo.PNG" alt="Certificado 3" class="certificado-img">
+      <h3 style="display: flex; justify-content: center;">ALGORITMO</h3>
+      <p style="display: flex; justify-content: center;">Instituição: Curso em Vídeo</p>
+      <p style="display: flex; justify-content: center;">Data: Agosto 2023</p>
+    </div>
+  </div>
+  <div class="ver-mais-container">
+    <a href="https://www.linkedin.com/in/lavinia-piratello-6a82101b1/details/certifications/" target="_blank" class="btn-ver-mais">
+      <i class="fas fa-arrow-right"></i> Ver Todos os Certificados
+    </a>
+  </div>
+</section>
+<hr class="divisoria-verde">
+    <!-- Seção Contato -->
+    <section class="contato">
+      <h2 style="margin-bottom: 2%; margin-top: -20px;">Contatos</h2>
+      <div class="contatos">
+        <a href="mailto:laviniappiratello@gmail.com" target="_blank" class="contato-item">
+          <i class="fas fa-envelope"></i> Email
+        </a>
+        <a href="https://github.com/laviniappiratello" target="_blank" class="contato-item">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/lavinia-piratello-6a82101b1/"target="_blank"  class="contato-item">
+          <i class="fab fa-linkedin"></i> Linkedin
+        </a>
+
+      </div>
+        <br>
+    </section>
+
+    
+  </main>
+
+
+  
+  <%- include('partials/footer') %>
+
+  <!-- Script do Glitch -->
+  <script src="/js/glitch-light.js" defer></script>
+</body>
+</html>

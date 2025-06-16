@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="/img/project.png">
+  <title>Deixe sua mensagem</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <%- include('partials/header') %>
+
+</head>
+<body>
+    <div class="container">
+        <canvas id="glitchCanvas" class="glitch-bg"></canvas>
+        <main style="max-width: 600px; margin: auto; padding: 40px;">
+        <h1 >Me envie uma mensagem!</h1>
+
+        <form action="/api/mensagens" method="POST">
+        <label for="nome">Nome:</label><br>
+        <input type="text" id="nome" name="nome" required><br><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="mensagem">Mensagem:</label><br>
+        <textarea id="mensagem" name="mensagem" rows="5" required></textarea><br><br>
+
+        <button class="btn-detalhes" type="submit">Enviar</button>
+        </form>
+
+        <br>
+        <h2>Mensagens recebidas</h2>
+        <br>
+        
+
+<% 
+  // Agrupa mensagens por usuário
+  const grouped = {};
+  mensagens.forEach(m => {
+    if (!grouped[m.nome]) grouped[m.nome] = [];
+    grouped[m.nome].push(m);
+  });
+%>
+
+<% for (let nome in grouped) { %>
+  <div class="usuario-mensagens">
+    <h3><%= nome %></h3>
+    <ul>
+      <% grouped[nome].forEach(mensagem => { %>
+        <li>
+          <%= mensagem.mensagem %> 
+          <!-- Botão para deletar a mensagem -->
+          <form action="/api/mensagens/<%= mensagem.mensagem_id %>?_method=DELETE" method="POST" style="display:inline;">
+            <button class="btn-github" type="submit" onclick="return confirm('Quer mesmo deletar essa mensagem?')">Deletar</button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+    </div>
+  </main>
+    <%- include('partials/footer') %>
+    <script src="/js/glitch-light.js"></script>
+  <script src="/js/menu.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>  <link rel="icon" href="/img/project.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <%- include('partials/header') %>
+
+</head>
+<body>
+
+  <canvas id="glitchCanvas" class="glitch-bg"></canvas>
+ <!-- fundooooooooooooooooooooooooooooooo-->
+  <%- include('partials/nav') %>
+
+  <main class="container projetos-container" style="margin-top: 6%;">
+    <h1 class="projetos-titulo" style="margin-bottom: 2%; margin-top: -20px;">Meus Projetos</h1>
+
+    <div class="projetos-lista">
+      <% projetos.forEach(projeto => { %>
+        <div class="projeto-card">
+          
+          <h2><%= projeto.nome %></h2>
+          <p><%= projeto.descricao %></p>
+          <div class="projeto-links" >
+            <a href="<%= projeto.github %>" target="_blank" class="btn-github">
+              <i class="fab fa-github"></i> Código no GitHub
+            </a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+
+  <script src="/js/glitch-light.js"></script>
+  <script src="/js/menu.js"></script>
+</body>
+</html>

@@ -25,3 +25,4 @@ Thumbs.db
 # Ignora configurações de IDEs
 .vscode/
 .idea/
+.env

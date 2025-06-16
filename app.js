@@ -1,34 +1,31 @@
 const express = require('express');
-const mysql = require('mysql2');
+const { Pool } = require('pg');
 const bodyParser = require('body-parser');
-const app = express();
-
 const methodOverride = require('method-override');
+require('dotenv').config();
+
+const app = express();
 app.use(methodOverride('_method'));
-
-
-// configurações
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 //conexão com o banco 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '060106',
-  database: 'portfolio_db'
+const db = new Pool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
+
 //verificação de conexão
-db.connect(err => {
-  if (err) {
-    console.error('Erro de conexão com MySQL:', err.message);
-    return;
-  }
-  console.log(' Conectado ao MySQL!');
-});
+
+db.connect()
+  .then(() => console.log('✅ Conectado ao PostgreSQL!'))
+  .catch(err => console.error('❌ Erro de conexão:', err.message));
 
 // dados estáticos dos projetos
 const projetos = [
@@ -85,106 +82,83 @@ app.get('/projetos', (req, res) => {
   });
 });
 
-app.get('/contato', (req, res) => {
-  const sql = `
-    SELECT mensagens.id AS mensagem_id, usuarios.nome, mensagens.mensagem
-    FROM mensagens
-    INNER JOIN usuarios ON mensagens.usuario_id = usuarios.id
-    ORDER BY usuarios.nome, mensagens.id;
-  `;
-  
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error('Erro ao buscar mensagens:', err.message);
-      return res.status(500).send('Erro no servidor');
-    }
-    
-    // Passa as mensagens para a view
-    res.render('contato', { mensagens: results });
-  });
+app.get('/contato', async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT mensagens.id AS mensagem_id, usuarios.nome, mensagens.mensagem
+      FROM mensagens
+      INNER JOIN usuarios ON mensagens.usuario_id = usuarios.id
+      ORDER BY usuarios.nome, mensagens.id;
+    `);
+    res.render('contato', { mensagens: rows });
+  } catch (err) {
+    console.error('Erro ao buscar mensagens:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
 });
 
-
-
-//---------------- CRUD ----------------
-
-//criar usuário e mensagem relacionada
-app.post('/api/mensagens', (req, res) => {
+// Criar usuário e mensagem
+app.post('/api/mensagens', async (req, res) => {
   const { nome, email, mensagem } = req.body;
-
-  //verifica se o usuário já existe
-  const checkUserQuery = `SELECT id FROM usuarios WHERE email = ?`;
-  db.query(checkUserQuery, [email], (err, results) => {
-    if (err) {
-      console.error('Erro ao verificar usuário:', err.message);
-      return res.status(500).json({ error: 'Erro no servidor' });
-    }
-
-    if (results.length > 0) {
-      //usuário já existe, usa o id para salvar a mensagem
-      const userId = results[0].id;
-      salvarMensagem(userId, mensagem, res);
+  try {
+    const checkUser = await db.query(`SELECT id FROM usuarios WHERE email = $1`, [email]);
+    let userId;
+    if (checkUser.rows.length > 0) {
+      userId = checkUser.rows[0].id;
     } else {
-      //usuário não existe, insere e depois salva a mensagem
-      const insertUserQuery = `INSERT INTO usuarios (nome, email) VALUES (?, ?)`;
-      db.query(insertUserQuery, [nome, email], (err, result) => {
-        if (err) {
-          console.error('Erro ao criar usuário:', err.message);
-          return res.status(500).json({ error: 'Erro no servidor' });
-        }
-        const userId = result.insertId;
-        salvarMensagem(userId, mensagem, res);
-      });
+      const insertUser = await db.query(`INSERT INTO usuarios (nome, email) VALUES ($1, $2) RETURNING id`, [nome, email]);
+      userId = insertUser.rows[0].id;
     }
-  });
+    await salvarMensagem(userId, mensagem, res);
+  } catch (err) {
+    console.error('Erro ao processar mensagem:', err.message);
+    res.status(500).json({ error: 'Erro no servidor' });
+  }
 });
 
-
-
-
-//mostrar relacionamento entre as tabelas
-app.get('/api/mensagens-com-usuario', (req, res) => {
-  const sql = `
-    SELECT mensagens.id AS mensagem_id, usuarios.id AS usuario_id, usuarios.nome, usuarios.email, mensagens.mensagem, mensagens.data_envio
-    FROM mensagens
-    INNER JOIN usuarios ON mensagens.usuario_id = usuarios.id
-    ORDER BY mensagens.data_envio DESC
-
-  `;
-
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error('Erro ao buscar mensagens com usuários:', err.message);
-      return res.status(500).json({ error: 'Erro no servidor' });
-    }
-    res.json(results);
-  });
+app.get('/api/mensagens-com-usuario', async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT mensagens.id AS mensagem_id, usuarios.id AS usuario_id, usuarios.nome, usuarios.email, mensagens.mensagem, mensagens.data_envio
+      FROM mensagens
+      INNER JOIN usuarios ON mensagens.usuario_id = usuarios.id
+      ORDER BY mensagens.data_envio DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro no servidor' });
+  }
 });
 
-//mostrar so os usuarios sem as mensagens 
-app.get('/api/usuarios', (req, res) => {
-  db.query('SELECT * FROM usuarios', (err, results) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro ao buscar usuários' });
-    }
-    res.json(results);
-  });
+app.get('/api/usuarios', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM usuarios');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar usuários' });
+  }
 });
 
-
-
-// deletar mensagem
-app.delete('/api/mensagens/:id', (req, res) => {
-  db.query('DELETE FROM mensagens WHERE id = ?', [req.params.id], (err) => {
-    if (err) {
-      console.error('Erro ao deletar mensagem:', err.message);
-      return res.status(500).json({ error: 'Erro no servidor' });
-    }
-    res.redirect('/contato'); // redireciona pra página de contato após deletar
-  });
+app.delete('/api/mensagens/:id', async (req, res) => {
+  try {
+    await db.query('DELETE FROM mensagens WHERE id = $1', [req.params.id]);
+    res.redirect('/contato');
+  } catch (err) {
+    console.error('Erro ao deletar mensagem:', err.message);
+    res.status(500).json({ error: 'Erro no servidor' });
+  }
 });
 
-// iniciar servidor
+async function salvarMensagem(userId, mensagem, res, isForm = false) {
+  try {
+    await db.query(`INSERT INTO mensagens (usuario_id, mensagem) VALUES ($1, $2)`, [userId, mensagem]);
+    return res.redirect('/contato');
+  } catch (err) {
+    console.error('Erro ao salvar mensagem:', err.message);
+    return res.status(500).json({ error: 'Erro no servidor' });
+  }
+}
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);

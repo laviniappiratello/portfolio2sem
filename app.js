@@ -96,7 +96,7 @@ app.get('/contato', async (req, res) => {
     `);
     res.render('contato', { mensagens: rows });
   } catch (err) {
-    console.error('Erro ao buscar mensagens:', err.message);
+    console.error('Erro ao buscar mensagens:', err);
     res.status(500).send('Erro no servidor');
   }
 });
@@ -104,19 +104,36 @@ app.get('/contato', async (req, res) => {
 // Criar usuário e mensagem
 app.post('/api/mensagens', async (req, res) => {
   const { nome, email, mensagem } = req.body;
+  console.log('Recebido:', { nome, email, mensagem });
+
   try {
-    const checkUser = await db.query(`SELECT id FROM usuarios WHERE email = $1`, [email]);
     let userId;
+
+    // Verifica se o usuário já existe pelo email
+    const checkUser = await db.query(`SELECT id FROM usuarios WHERE email = $1`, [email]);
     if (checkUser.rows.length > 0) {
       userId = checkUser.rows[0].id;
+      console.log('Usuário existente com id:', userId);
     } else {
-      const insertUser = await db.query(`INSERT INTO usuarios (nome, email) VALUES ($1, $2) RETURNING id`, [nome, email]);
+      // Insere novo usuário
+      const insertUser = await db.query(
+        `INSERT INTO usuarios (nome, email) VALUES ($1, $2) RETURNING id`,
+        [nome, email]
+      );
       userId = insertUser.rows[0].id;
+      console.log('Usuário criado com id:', userId);
     }
-    await salvarMensagem(userId, mensagem, res);
+
+    // Insere mensagem
+    await db.query(`INSERT INTO mensagens (usuario_id, mensagem) VALUES ($1, $2)`, [userId, mensagem]);
+    console.log('Mensagem inserida com sucesso');
+
+    // Pode enviar JSON ou redirecionar
+    return res.redirect('/contato');
+    // ou: return res.json({ success: true });
   } catch (err) {
-    console.error('Erro ao processar mensagem:', err.message);
-    res.status(500).json({ error: 'Erro no servidor' });
+    console.error('Erro ao processar mensagem:', err);
+    return res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -130,61 +147,41 @@ app.get('/api/mensagens-com-usuario', async (req, res) => {
     `);
     res.json(rows);
   } catch (err) {
+    console.error('Erro ao listar mensagens:', err);
     res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
+// Rota para listar usuários via API JSON
 app.get('/api/usuarios', async (req, res) => {
   try {
     const { rows } = await db.query('SELECT * FROM usuarios');
     res.json(rows);
   } catch (err) {
+    console.error('Erro ao buscar usuários:', err);
     res.status(500).json({ error: 'Erro ao buscar usuários' });
   }
 });
 
+// Rota para deletar mensagem pelo id
 app.delete('/api/mensagens/:id', async (req, res) => {
   try {
-    await db.query('DELETE FROM mensagens WHERE id = $1', [req.params.id]);
-    res.redirect('/contato');
+    const { id } = req.params;
+    await db.query('DELETE FROM mensagens WHERE id = $1', [id]);
+    console.log(`Mensagem com id ${id} deletada`);
+    return res.redirect('/contato');
   } catch (err) {
-    console.error('Erro ao deletar mensagem:', err.message);
+    console.error('Erro ao deletar mensagem:', err);
     res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
-async function salvarMensagem(userId, mensagem, res, isForm = false) {
-  try {
-    await db.query(`INSERT INTO mensagens (usuario_id, mensagem) VALUES ($1, $2)`, [userId, mensagem]);
-    return res.redirect('/contato');
-  } catch (err) {
-    console.error('Erro ao salvar mensagem:', err.message);
-    return res.status(500).json({ error: 'Erro no servidor' });
-  }
-}
-
+// Inicia o servidor
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
 
-
-function salvarMensagem(userId, mensagem, res, isForm = false) {
-  const insertMessageQuery = `INSERT INTO mensagens (usuario_id, mensagem) VALUES (?, ?)`;
-  db.query(insertMessageQuery, [userId, mensagem], (err, result) => {
-    if (err) {
-      console.error('Erro ao salvar mensagem:', err.message);
-      return isForm ? res.status(500).send('Erro no servidor') : res.status(500).json({ error: 'Erro no servidor' });
-    }
-
-    if (isForm) {
-      // Redireciona para a página de contato após salvar a mensagem
-      return res.redirect('/contato');
-    }
-    return res.redirect('/contato');
-    res.json({ success: true, id: result.insertId });
-  });
-}
 
 
 

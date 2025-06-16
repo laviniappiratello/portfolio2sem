@@ -37,7 +37,7 @@ const projetos = [
     id: 1,
     nome: "Portfólio 2025",
     descricao: "Portfólio desenvolvido como parte da disciplina de Desenvolvimento Web 2.",
-    github: "https://github.com/laviniappiratello/portfolio_",
+    github: "https://github.com/laviniappiratello/portfolio2sem",
   },
   {
     id: 2,
